@@ -106,7 +106,8 @@ services:
   # RAM: process.size 1024m, container limit 1200m (ada margin)
   # ---------------------------------------------------------------
   flink-jobmanager:
-    image: flink:1.20-java17
+    build: ./flink            # flink:1.20 + Python/PyFlink
+    image: flink-pyflink:1.20
     container_name: flink-jobmanager
     hostname: flink-jobmanager
     command: jobmanager
@@ -120,6 +121,7 @@ services:
     volumes:
       - ./flink/lib/flink-sql-connector-kafka.jar:/opt/flink/lib/flink-sql-connector-kafka.jar:ro
       - ./flink/sql:/opt/flink/sql:ro
+      - ./flink/jobs:/opt/flink/jobs:ro
     mem_limit: 1200m
     networks:
       - data-net
@@ -132,7 +134,7 @@ services:
   # RAM: process.size 1536m, container limit 1700m, 2 slot
   # ---------------------------------------------------------------
   flink-taskmanager:
-    image: flink:1.20-java17
+    image: flink-pyflink:1.20   # image sama dengan JobManager (build di service jobmanager)
     container_name: flink-taskmanager
     hostname: flink-taskmanager
     command: taskmanager
@@ -144,6 +146,7 @@ services:
     volumes:
       - ./flink/lib/flink-sql-connector-kafka.jar:/opt/flink/lib/flink-sql-connector-kafka.jar:ro
       - ./flink/sql:/opt/flink/sql:ro
+      - ./flink/jobs:/opt/flink/jobs:ro
     mem_limit: 1700m
     networks:
       - data-net

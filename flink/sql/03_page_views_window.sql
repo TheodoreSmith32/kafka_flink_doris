@@ -6,7 +6,7 @@ SELECT
   window_start,
   window_end,
   page,
-  COUNT(*)                  AS views,
+  COUNT(*)                  AS view_count,
   COUNT(DISTINCT user_id)   AS unique_users
 FROM TABLE(
   TUMBLE(TABLE app_activity, DESCRIPTOR(event_time), INTERVAL '1' MINUTE)

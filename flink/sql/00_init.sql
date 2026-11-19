@@ -98,7 +98,7 @@ CREATE TEMPORARY TABLE enriched_transaction_journey (
 -- Sink window aggregation (hasil TUMBLE bersifat append-only -> connector 'kafka' biasa)
 CREATE TEMPORARY TABLE page_views_per_minute (
   window_start TIMESTAMP(3), window_end TIMESTAMP(3),
-  page STRING, views BIGINT, unique_users BIGINT
+  page STRING, view_count BIGINT, unique_users BIGINT
 ) WITH (
   'connector' = 'kafka', 'topic' = 'page_views_per_minute',
   'properties.bootstrap.servers' = 'kafka:19092',

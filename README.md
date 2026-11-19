@@ -105,13 +105,13 @@ Query lengkap ada di [`flink/sql/02_transaction_journey.sql`](flink/sql/02_trans
 |---|---|
 | `window_start`, `window_end` | batas jendela 1 menit |
 | `page` | halaman |
-| `views` | jumlah event aktivitas |
+| `view_count` | jumlah event aktivitas |
 | `unique_users` | jumlah user unik |
 
 ```sql
 INSERT INTO page_views_per_minute
 SELECT window_start, window_end, page,
-       COUNT(*) AS views, COUNT(DISTINCT user_id) AS unique_users
+       COUNT(*) AS view_count, COUNT(DISTINCT user_id) AS unique_users
 FROM TABLE(TUMBLE(TABLE app_activity, DESCRIPTOR(event_time), INTERVAL '1' MINUTE))
 GROUP BY window_start, window_end, page;
 ```
