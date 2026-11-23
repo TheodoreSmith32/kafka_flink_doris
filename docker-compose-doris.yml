@@ -1,0 +1,82 @@
+# Apache Doris (1 FE + 1 BE) untuk belajar, BERDIRI SENDIRI (network `doris-net` sendiri,
+# tidak terhubung ke Kafka/Flink). Nanti bisa digabung ke docker-compose.yml.
+#
+# Cara pakai:
+#   docker compose -f docker-compose-doris.yml up -d
+#
+# Syarat WSL2 (wajib, sekali per restart WSL; tanpa ini BE gagal start):
+#   sudo sysctl -w vm.max_map_count=2000000
+#
+# Akses dari host:
+#   MySQL client : mysql -h 127.0.0.1 -P 9030 -uroot      (password kosong)
+#   FE Web UI    : http://localhost:8030
+# Antar container di doris-net: FE 172.30.0.100, BE 172.30.0.101
+#
+# Catatan IP statis: image Doris memakai IP (bukan hostname) di FE_SERVERS / BE_ADDR, jadi FE dan BE
+# diberi IP tetap. Subnet doris-net ditetapkan eksplisit
+# di bagian `networks` (wajib, kalau tidak Docker menolak IP statis).
+# Kalau bentrok dengan network lain, ganti subnet dan kedua IP di bawah.
+
+name: kafka-flink-doris-doris
+
+services:
+  doris-fe:
+    image: apache/doris:fe-3.0.8
+    container_name: doris-fe
+    hostname: doris-fe
+    ports:
+      - "8030:8030"   # FE HTTP (Web UI + Stream Load)
+      - "9030:9030"   # FE MySQL protocol
+    environment:
+      FE_SERVERS: "fe1:172.30.0.100:9010"
+      FE_ID: "1"
+    volumes:
+      - doris-fe-meta:/opt/apache-doris/fe/doris-meta
+      - doris-fe-log:/opt/apache-doris/fe/log
+    mem_limit: 2g
+    networks:
+      doris-net:
+        ipv4_address: 172.30.0.100
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:8030/api/bootstrap > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  doris-be:
+    image: apache/doris:be-3.0.8
+    container_name: doris-be
+    hostname: doris-be
+    ports:
+      - "8040:8040"   # BE HTTP
+    environment:
+      FE_SERVERS: "fe1:172.30.0.100:9010"
+      BE_ADDR: "172.30.0.101:9050"
+    volumes:
+      - doris-be-storage:/opt/apache-doris/be/storage
+      - doris-be-log:/opt/apache-doris/be/log
+    mem_limit: 3g
+    # BE membutuhkan ulimit nofile besar
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    networks:
+      doris-net:
+        ipv4_address: 172.30.0.101
+    depends_on:
+      doris-fe:
+        condition: service_healthy
+
+networks:
+  doris-net:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  doris-fe-meta:
+  doris-fe-log:
+  doris-be-storage:
+  doris-be-log:

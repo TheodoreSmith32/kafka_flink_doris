@@ -1,0 +1,22 @@
+{
+  "name": "doris-sink-alerts",
+  "config": {
+    "connector.class": "org.apache.doris.kafka.connector.DorisSinkConnector",
+    "tasks.max": "1",
+    "topics": "alerts",
+    "doris.topic2table.map": "alerts:alerts",
+    "doris.urls": "GANTI_HOST_VELODB",
+    "doris.http.port": "GANTI_PORT_HTTP",
+    "doris.query.port": "GANTI_PORT_MYSQL",
+    "doris.user": "GANTI_USER",
+    "doris.password": "GANTI_PASSWORD",
+    "doris.database": "GANTI_DB",
+    "delivery.guarantee": "at_least_once",
+    "buffer.count.records": "10000",
+    "buffer.flush.time": "60",
+    "buffer.size.bytes": "5000000",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

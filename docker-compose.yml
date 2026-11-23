@@ -68,7 +68,12 @@ services:
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+      # Disarankan doc Doris connector (>30 menit) agar Stream Load tidak timeout
+      CONNECT_CONSUMER_MAX_POLL_INTERVAL_MS: 1800000
       KAFKA_HEAP_OPTS: "-Xms256m -Xmx512m"
+    volumes:
+      # Doris Kafka Connector 25.0.0 (jar diunduh dari Maven Central, lihat README)
+      - ./connect/plugins/doris-kafka-connector:/usr/share/confluent-hub-components/doris-kafka-connector:ro
     mem_limit: 1g
     networks:
       - data-net
